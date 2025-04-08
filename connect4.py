@@ -7,7 +7,7 @@ import math
 
 ROW_COUNT = 6
 COLUMN_COUNT = 7
-EVEN=0
+EVEN= 0
 ODD = 1
 def create_board():
     board = np.zeros((ROW_COUNT,COLUMN_COUNT))  
@@ -18,6 +18,8 @@ def valid(board,position):
         if board[r][position] == 0:
             return True
     return False
+
+
 
 def drop_piece(board,position,piece):
     for r in range(ROW_COUNT):
@@ -51,6 +53,9 @@ def check_win(board, piece):
                 return True
 
     return False 
+
+def is_full(board):
+    return all(board[row][col] != " " for row in range(6) for col in range(7))
 
 board = create_board()
 game_over = False
