@@ -2,6 +2,7 @@ import pygame
 import sys
 import numpy as np
 import math
+import classes
 
 
 ROW_COUNT = 6
@@ -16,8 +17,11 @@ BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
+WHITE = (255,255,255)
 
 pygame.init()
+
+#Homepage
 
 # Create the board
 def create_board():
@@ -116,7 +120,8 @@ def main():
 
                 if board[0][col] == 0:  # Check if the column is not full
                     row = get_next_open_row(board, col)  # Get the next available row
-                    drop_piece(board, row, col, 1 if turn == 0 else 2)  # Drop the piece for Player 1 or Player 2
+                    drop_piece(board, row, col, 1 if turn == 0 else 2)
+                    
 
                     # check win for every turn
                     if check_win(board, 1 if turn == 0 else 2): 
@@ -134,6 +139,10 @@ def main():
                         turn+=1
                     else:
                         turn =0
+                    if turn == 0:
+                        pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE / 2)), RADIUS)
+                    else:
+                        pygame.draw.circle(screen, YELLOW, (posx, int(SQUARESIZE / 2)), RADIUS)
 
          
 
@@ -146,7 +155,21 @@ def main():
                         print("It's a draw!")
                         game_over = True
 
-    pygame.quit()  # Close Pygame
+    pygame.quit()  #Quit
+
+
+def HomePage():
+
+    screen = pygame.display.set_mode((width, height))
+    pygame.display.set_caption("Connect 4")
+    # home screen display 2 options to play player v player or vs bot.
+    for event in pygame.event.get():
+     if event.type == pygame.MOUSEBUTTONDOWN:
+         posx = event.pos[0]
+        
+         
+
+
 
 if __name__ == "__main__":
     main()
