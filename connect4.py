@@ -6,8 +6,18 @@ import math
 
 ROW_COUNT = 6
 COLUMN_COUNT = 7
-EVEN = 0
-ODD = 1
+SQUARESIZE = 100
+RADIUS = int(SQUARESIZE / 2 - 5)
+width = COLUMN_COUNT * SQUARESIZE
+height = (ROW_COUNT + 1) * SQUARESIZE
+
+
+BLUE = (0, 0, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+YELLOW = (255, 255, 0)
+
+pygame.init()
 
 # Create the board
 def create_board():
@@ -46,85 +56,97 @@ def check_win(board, piece):
 
     return False
 
-# Check if the board is full
+# Check if the board is full / draw
 def is_full(board):
     return all(board[row][col] != 0 for row in range(ROW_COUNT) for col in range(COLUMN_COUNT))
 
-# Get the next available row for a given column (starts from the bottom)
 def get_next_open_row(board, col):
     for r in range(ROW_COUNT - 1, -1, -1):  # Loop from the bottom row (ROW_COUNT-1) to the top row (0)
-        if board[r][col] == 0:  # If there's an empty spot (0)
+        if board[r][col] == 0:  #
             return r
-    return -1  # Return -1 if no empty spot is found (column is full)
+    return -1  #if column is full return -1
 
-# Print the board for visual debugging
-def print_board(board):
-    for r in range(ROW_COUNT):
-        print("|", end="")
-        for c in range(COLUMN_COUNT):
-            print(" " + str(int(board[r][c])) + " |", end="")
-        print("\n" + "----" * COLUMN_COUNT)
+# Draw the game board
+def draw_board(board, screen):
+    for c in range(COLUMN_COUNT):
+        for r in range(ROW_COUNT):
+            pygame.draw.rect(screen, BLUE, (c * SQUARESIZE, r * SQUARESIZE + SQUARESIZE, SQUARESIZE, SQUARESIZE))
+            pygame.draw.circle(screen, BLACK, (int(c * SQUARESIZE + SQUARESIZE / 2), int(r * SQUARESIZE + SQUARESIZE + SQUARESIZE / 2)), RADIUS)
+
+            # Draw the pieces (Player 1 - Red, Player 2 - Yellow)
+            if board[r][c] == 1:
+                pygame.draw.circle(screen, RED, (int(c * SQUARESIZE + SQUARESIZE / 2), int(r * SQUARESIZE + SQUARESIZE + SQUARESIZE / 2)), RADIUS)
+            elif board[r][c] == 2:
+                pygame.draw.circle(screen, YELLOW, (int(c * SQUARESIZE + SQUARESIZE / 2), int(r * SQUARESIZE + SQUARESIZE + SQUARESIZE / 2)), RADIUS)
 
 # Main game loop
-board = create_board()
-game_over = False
-turn = 0
+def main():
+    board = create_board()
+    game_over = False
+    turn = 0  # 0 = Player 1 (Red), 1 = Player 2 (Yellow)
 
-while not game_over:
-    print_board(board)
-    
-    if turn == 0:  # Player 1's turn
-        while True:
-            try:
-                col = int(input("Player 1, make your selection (0-6): "))
-                if col < 0 or col >= 7:
-                    print("Invalid column. Please enter a number between 0 and 6.")
-                    continue
 
-                row = get_next_open_row(board, col)
-                if row != -1:  # If we found a valid row
-                    drop_piece(board, row, col, 1)
-                    break
+    screen = pygame.display.set_mode((width, height))
+    pygame.display.set_caption("Connect 4")
+
+    # Game loop
+    while not game_over:
+        draw_board(board, screen)
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEMOTION:
+                pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))  # Clear the top row where the preview is drawn
+                posx = event.pos[0]
+
+                if turn == 0:
+                    pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE / 2)), RADIUS)
                 else:
-                    print("Column is full. Try a different column.")
-            except ValueError:
-                print("Invalid input. Please enter an integer between 0 and 6.")
-                continue
+                    pygame.draw.circle(screen, YELLOW, (posx, int(SQUARESIZE / 2)), RADIUS)
 
-        if check_win(board, 1):
-            print_board(board)
-            print("Player 1 wins!")
-            game_over = True
-        else:
-            turn += 1  # Switch turn to Player 2
 
-    else:  # Player 2's turn
-        while True:
-            try:
-                col = int(input("Player 2, make your selection (0-6): "))
-                if col < 0 or col >= 7:
-                    print("Invalid column. Please enter a number between 0 and 6.")
-                    continue
 
-                row = get_next_open_row(board, col)
-                if row != -1:  # If we found a valid row
-                    drop_piece(board, row, col, 2)
-                    break
-                else:
-                    print("Column is full. Try a different column.")
-            except ValueError:
-                print("Invalid input. Please enter an integer between 0 and 6.")
-                continue
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                posx = event.pos[0]
+                col = int(posx // SQUARESIZE)  # Get the column based on the mouse position
 
-        if check_win(board, 2):
-            print_board(board)
-            print("Player 2 wins!")
-            game_over = True
-        else:
-            turn = 0  # Switch turn to Player 1
+                if board[0][col] == 0:  # Check if the column is not full
+                    row = get_next_open_row(board, col)  # Get the next available row
+                    drop_piece(board, row, col, 1 if turn == 0 else 2)  # Drop the piece for Player 1 or Player 2
 
-    # Check for a draw
-    if is_full(board) and not game_over:
-        print_board(board)
-        print("It's a draw!")
-        game_over = True
+                    # check win for every turn
+                    if check_win(board, 1 if turn == 0 else 2): 
+                        draw_board(board, screen)
+                        pygame.display.update()
+                        pygame.time.wait(500)
+                        if turn == 0:
+                            print("Player 1 wins!")
+                        else:
+                            print("Player 2 wins!")
+                        game_over = True
+
+                        # switching turns
+                    if turn == 0:
+                        turn+=1
+                    else:
+                        turn =0
+
+         
+
+                    draw_board(board, screen)  # Redraw the board after the move
+
+                    if is_full(board):  # Check for a draw
+                        draw_board(board, screen)
+                        pygame.display.update()
+                        pygame.time.wait(500)
+                        print("It's a draw!")
+                        game_over = True
+
+    pygame.quit()  # Close Pygame
+
+if __name__ == "__main__":
+    main()
