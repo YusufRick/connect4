@@ -1,9 +1,9 @@
 import random
-import connect4
 
-class Bots:
+
+
     
-    class Random_Agent:
+class Random_Agent:
         def __init__(self):
             pass
 
@@ -17,7 +17,7 @@ class Bots:
 
     
     #Plays using a basic set of rules: win > block > center > random.
-    class Smart_Agent:
+class Smart_Agent:
         def __init__(self):
             pass
         
