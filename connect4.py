@@ -36,17 +36,17 @@ def draw_button(x, y, text, screen):
     draw_text(text, WHITE, x + 20, y + 15, screen)
 
 def HomePage():
-    screen = pygame.display.set_mode((width, height))
+    screen = pygame.display.set_mode((width , height))
     pygame.display.set_caption("Connect 4")
     
     # Main game loop for the home screen
     game_running = True
     while game_running:
-        screen.fill(WHITE)
+        screen.fill(RED)
         
         draw_text("Welcome to Connect 4", BLACK, width // 3, height // 4, screen)
-        draw_button(width // 3, height // 2 - 80, "Player vs Player", screen)
-        draw_button(width // 3, height // 2 + 20, "Player vs Bot", screen)
+        draw_button(width //4, height // 2 - 80, "Player vs Player", screen)
+        draw_button(width  //4, height // 2 + 20, "Player vs Bot", screen)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -192,6 +192,7 @@ def start_player_vs_player():
          
 
                     draw_board(board, screen)  # Redraw the board after the move
+                    print(board)
 
                     if is_full(board):  # Check for a draw
                         draw_board(board, screen)
@@ -239,7 +240,10 @@ def start_player_vs_bot():
 
                 if board[0][col] == 0:  # Check if the column is not full
                     row = get_next_open_row(board, col)  # Get the next available row
-                    drop_piece(board, row, col, 1)  # Drop the player's piece
+                    drop_piece(board, row, col, 1) 
+                     # Drop the player's piece
+                    print(" Player move: ")
+                    print(board)
 
                     if check_win(board, 1):  # Check if the player wins
                         draw_board(board, screen)
@@ -253,6 +257,7 @@ def start_player_vs_bot():
 
         if turn == 1 and not game_over:  # Bot's turn (after player)
             print("Bot is thinking...")
+            print(board)
 
             # Use the smart bot to make a move
             col = smart_bot.smart_agent_move(board)

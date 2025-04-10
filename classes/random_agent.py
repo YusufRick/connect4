@@ -16,7 +16,7 @@ class Random_Agent:
             return col
 
     
-    #Plays using a basic set of rules: win > block > center > random.
+    #Plays using a basic set of rules: win > block > random.
 class Smart_Agent:
         def __init__(self):
             pass
@@ -77,10 +77,6 @@ class Smart_Agent:
             for col in self.get_available_moves(board):
                 if self.check_winner(board, col, 1):  
                     return col  # Block the winning move
-
-            # Take center
-            if board[0][3] == 0:
-                return 3  
 
             # Random move
             return random.choice(self.get_available_moves(board))
