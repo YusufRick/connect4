@@ -7,7 +7,7 @@ class Random_Agent:
         def __init__(self):
             pass
 
-        def random_agent_move(self, board):
+        def best_move(self, board):
             # search for empty cells
             empty_cells = [(row, col) for row in range(6) for col in range(7)
                            if board[row][col] == 0]
@@ -67,7 +67,7 @@ class Smart_Agent:
 
             return False
         
-        def smart_agent_move(self, board):
+        def best_move(self, board):
             # check for a winning move
             for col in self.get_available_moves(board):
                 if self.check_winner(board, col, 2):  # Check if Player 2 can win
