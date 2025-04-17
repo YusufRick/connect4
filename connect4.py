@@ -70,8 +70,8 @@ def HomePage():
 
                 # Player vs MiniMax Agent selected
                 elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 120 <= posy <= height // 2 + 120 + 60:
-                    print("Player vs MiniMax Agent selected")
-                    start_player_vs_minimax()
+                    print("Bot v Bot")
+                    start_bot_v_bot()
 
         pygame.display.update()
 
@@ -279,6 +279,7 @@ def start_player_vs_bot(bot_agent):
                 if board[0][col] == 0:  # Check if column is not full
                     row = get_next_open_row(board, col)
                     drop_piece(board, row, col, 1)
+                    print(board)
                     if check_win(board, 1):
                         draw_board(board, screen)
                         pygame.display.update()
@@ -292,6 +293,7 @@ def start_player_vs_bot(bot_agent):
 
             row = get_next_open_row(board, col)
             drop_piece(board, row, col, 2)
+            print(board)
 
             if check_win(board, 2):
                 draw_board(board, screen)
