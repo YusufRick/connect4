@@ -43,22 +43,30 @@ class Minimax_Agent:
 
     def evaluate_board(self, board):
         if self.check_win(board, self.ai_player):
-            return 1000000 # Bot wins
+            return 1000000  # AI wins
         elif self.check_win(board, self.opponents):
-            return -100000  # opponent wins
+            return -10000000  # Opponent wins
+
         score = 0
-
         available_moves = self.get_available_moves(board)
-        for col in range(available_moves):
-                # Check if placing a piece here would block an opponent's win
-            if self.check_win(board,self.opponents):
-                score += 10  
 
-                # Check if placing a piece here would result in a win for the AI
-            if self.check_win(board,self.ai_player):
-                score += 100  
+        for col in available_moves:
+            row = self.get_next_open_row(board, col)
+        
+            board[row][col] = self.ai_player
+            if self.check_win(board, self.ai_player):
+                score += 100  # Reward AI for winning
+
+        # Simulate the opponent's move
+            board[row][col] = self.opponents
+            if self.check_win(board, self.opponents):
+                score -= 10000  # Penalize if it allows the opponent to win
+
+        # Undo the move
+            board[row][col] = 0
 
         return score
+
     
         
     def best_move(self,board):

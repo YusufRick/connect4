@@ -10,6 +10,7 @@ from classes.minimax_agent import Minimax_Agent
 
 
 
+
 ROW_COUNT = 6
 COLUMN_COUNT = 7
 SQUARESIZE = 100
@@ -47,7 +48,7 @@ def HomePage():
         draw_text("Welcome to Connect 4", BLACK, width // 3, height // 4, screen)
         draw_button(width // 4, height // 2 - 80, "Player vs Player", screen)
         draw_button(width // 4, height // 2 + 20, "Player vs Bot", screen)
-        draw_button(width // 4, height // 2 + 120, "Player vs MiniMax Agent", screen)
+        draw_button(width // 4, height // 2 + 120, "Bot vs Bot", screen)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -71,7 +72,7 @@ def HomePage():
                 # Player vs MiniMax Agent selected
                 elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 120 <= posy <= height // 2 + 120 + 60:
                     print("Bot v Bot")
-                    start_bot_v_bot()
+                    choose_bot_v_bot()
 
         pygame.display.update()
 
@@ -90,6 +91,7 @@ def choose_bot_agent():
         draw_button(width // 4, height // 2 - 80, "Random Agent", screen)
         draw_button(width // 4, height // 2 + 20, "Smart Agent", screen)
         draw_button(width // 4, height // 2 + 120, "MiniMax Agent", screen)
+        draw_button(width // 4, height // 2 + 220, "ML Agent", screen)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -111,6 +113,10 @@ def choose_bot_agent():
                 elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 120 <= posy <= height // 2 + 120 + 60:
                     print("MiniMax Agent selected")
                     start_player_vs_bot(Minimax_Agent())
+
+                elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 220 <= posy <= height // 2 + 220 + 60:
+                    print("ML Agent selected")
+                    start_player_vs_bot(ML_Agent())
 
         pygame.display.update()
 
@@ -250,6 +256,9 @@ def start_player_vs_player():
 
     pygame.quit()  #Quit
 
+
+
+# player v bot
 def start_player_vs_bot(bot_agent):
     board = create_board()
     game_over = False
@@ -308,6 +317,9 @@ def start_player_vs_bot(bot_agent):
             print("It's a draw!")
             game_over = True
             break
+
+def choose_bot_v_bot():
+    pass
          
 
 
