@@ -5,6 +5,7 @@ import math
 from classes.random_agent import Random_Agent
 from classes.random_agent import Smart_Agent
 from classes.minimax_agent import Minimax_Agent
+
 from classes.board import Board
 
 
