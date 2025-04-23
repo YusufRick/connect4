@@ -409,10 +409,11 @@ def start_player_vs_bot(bot_agent):
 
                     if board.check_win(1):  # Check for a win for Player 1
                         board.draw_board(screen)
+                        draw_text("Player 1 wins!", WHITE, width // 4, height // 3, screen)
                         pygame.display.update()
                         print("Player 1 wins!")
                         game_over = True
-                    turn = 1  # Switch to bot
+                    turn = 1  # Switch turn
 
         if turn == 1 and not game_over:  # Bot's turn
             print(f"Bot is thinking... {bot_agent}")
@@ -425,18 +426,39 @@ def start_player_vs_bot(bot_agent):
 
             if board.check_win(2):  # Check for a win for the Bot
                 board.draw_board(screen)
+                draw_text(" You Lose!", WHITE, width // 4, height // 3, screen)
                 pygame.display.update()
                 print("Bot wins!")
                 game_over = True
-            turn = 0  # Switch back to player
+            turn = 0  # Switch turn to player
 
         if board.is_full() and not game_over:  # Check for a draw
             board.draw_board(screen)
+            draw_text("Its a Draw!", WHITE, width // 4, height // 3, screen)
             pygame.display.update()
             print("It's a draw!")
             game_over = True
             break
 
+    wait_for_exit(screen)
+
+
+def wait_for_exit(screen):
+    # Display a message to instruct the user to press any key or click to exit
+    pygame.display.update()
+
+    # Wait for a key press or mouse click to exit
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                waiting = False
+                pygame.quit()
+                sys.exit()
+    
 
 
          
@@ -445,3 +467,6 @@ def start_player_vs_bot(bot_agent):
 
 if __name__ == "__main__":
     HomePage()
+    pygame.mixer.init()
+    pygame.mixer.music.load("music.mp3") 
+    pygame.mixer.music.play(-1,0.0)
