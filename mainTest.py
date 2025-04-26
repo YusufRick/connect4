@@ -7,7 +7,7 @@ import math
 from classes.random_agent import Random_Agent
 from classes.random_agent import Smart_Agent
 from classes.minimax_agent import Minimax_Agent
-from classes.test import MLAgent
+from classes.test_RandomForestClassifier import MLAgent
 
 from classes.board import Board
 
@@ -103,19 +103,19 @@ def choose_bot_agent():
 
                 if width // 3 <= posx <= width // 3 + 200 and height // 2 - 80 <= posy <= height // 2 - 80 + 60:
                     print("Random Agent selected")
-                    start_player_vs_bot(Random_Agent())
+                    choose_player_order(Random_Agent(2,1,0))
 
                 elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 20 <= posy <= height // 2 + 20 + 60:
                     print("Smart Agent selected")
-                    start_player_vs_bot(Smart_Agent())
+                    choose_player_order(Smart_Agent(2,1,0))
 
                 elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 120 <= posy <= height // 2 + 120 + 60:
                     print("MiniMax Agent selected")
-                    start_player_vs_bot(Minimax_Agent())
+                    choose_player_order(Minimax_Agent(2,1,0))
 
                 elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 220 <= posy <= height // 2 + 220 + 60:
                     print("ML Agent selected")
-                    ml_agent = MLAgent()
+                    ml_agent = MLAgent(2,1,0)
                     X = connect_4.data.features
                     X = X.replace({'x': 1, 'o': 2, 'b': 0}).astype(int)
 
@@ -124,10 +124,95 @@ def choose_bot_agent():
                     y = y.replace({'win': 0, 'draw': 1, 'loss': 2})
                     ml_agent.load_data(X, y) 
                     ml_agent.train()
-                    start_player_vs_bot(ml_agent)  # Use ML Agent here
+                    choose_player_order(ml_agent)  # Use ML Agent here
 
         pygame.display.update()
 
+# pvp
+def start_player_vs_player():
+    board = Board()
+    game_over = False
+    turn = 0  # 0 = Player 1 (Red), 1 = Player 2 (Yellow)
+    screen = pygame.display.set_mode((width, height))
+    pygame.display.set_caption("Connect 4")
+
+    # Game loop
+    while not game_over:
+
+        board.draw_board(screen)
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEMOTION:
+                pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))  # Clear the top row where the preview is drawn
+                posx = event.pos[0]
+
+                if turn == 0:
+                    pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE / 2)), RADIUS)
+                else:
+                    pygame.draw.circle(screen, YELLOW, (posx, int(SQUARESIZE / 2)), RADIUS)
+
+
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                posx = event.pos[0]
+                col = int(posx // SQUARESIZE)  # Get the column based on the mouse position
+
+                if board.board[0][col] == 0:  # Check if the column is not full
+                    row = board.get_next_open_row(col)  
+                    if turn ==0:
+                        piece = 1
+                    else:
+                        piece = 2
+                    board.drop_piece(row, col,piece)
+
+                    board.draw_board(screen)
+                    pygame.display.update()
+                    
+
+                    # check win for every turn
+                    if board.check_win(piece): 
+                        board.draw_board(screen)
+                        pygame.display.update()
+                        pygame.time.wait(500)
+
+                        draw_text(f"Player {piece} wins!", WHITE,width//4, height//3, screen)
+                        pygame.display.update()
+                        wait_for_exit(screen)
+                        
+                        game_over = True
+
+                    if board.is_full():  # Check for a draw
+                        board.draw_board( screen)
+                        pygame.display.update()
+                        pygame.time.wait(500)
+                        print("It's a draw!")
+                        draw_text("It's a draw!", WHITE, width // 4, height // 3, screen)
+                        pygame.display.update()
+                        wait_for_exit(screen)
+
+                        game_over = True
+
+                    # switching turns
+                    if turn == 0:
+                        turn+=1
+                    else:
+                        turn =0
+                    if turn == 0:
+                        pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE / 2)), RADIUS)
+                    else:
+                        pygame.draw.circle(screen, YELLOW, (posx, int(SQUARESIZE / 2)), RADIUS)
+
+         
+
+                    board.draw_board(screen)  # Redraw the board after the move
+                    print(board)
+
+    wait_for_exit(screen)
 
 # Bot v Bot
 def choose_bot_v_bot():
@@ -182,15 +267,15 @@ def choose_bot_v_bot():
 
                         if width // 3 <= posx2 <= width // 3 + 200 and height // 2 - 80 <= posy2 <= height // 2 - 80 + 60:
                             print("Random Agent selected as Bot 2")
-                            bot2 = Random_Agent()
+                            bot2 = Random_Agent(2,1)
 
                         elif width // 3 <= posx2 <= width // 3 + 200 and height // 2 + 20 <= posy2 <= height // 2 + 20 + 60:
                             print("Smart Agent selected as Bot 2")
-                            bot2 = Smart_Agent()
+                            bot2 = Smart_Agent(2,1)
 
                         elif width // 3 <= posx2 <= width // 3 + 200 and height // 2 + 120 <= posy2 <= height // 2 + 120 + 60:
                             print("MiniMax Agent selected as Bot 2")
-                            bot2 = Minimax_Agent()
+                            bot2 = Minimax_Agent(2,1)
 
                         start_bot_vs_bot(bot1, bot2)
                         return
@@ -248,10 +333,15 @@ def start_bot_vs_bot(bot1, bot2):
 
 
 # player vs bot
-def start_player_vs_bot(bot_agent):
+def start_player_vs_bot(bot_agent, human_piece, bot_piece,turn):
     board = Board()
     game_over = False
-    turn = 0  # 0 = Player 1 (Red), 1 = Bot (Yellow)
+    # 0 = Red, 1 = Yellow
+
+    if turn == 0:
+        preview_color = RED
+    else:
+        preview_color = YELLOW
 
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("Connect 4")
@@ -268,7 +358,14 @@ def start_player_vs_bot(bot_agent):
             if event.type == pygame.MOUSEMOTION:
                 pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
                 posx = event.pos[0]
-                pygame.draw.circle(screen, RED if turn == 0 else YELLOW, (posx, int(SQUARESIZE / 2)), RADIUS)
+                if turn == 0:
+                    # human goes by red piece
+                    pygame.draw.circle(screen, preview_color,(posx, SQUARESIZE//2), RADIUS)
+                else:
+                    # bots turn change the piece to yellow
+                    
+                    pygame.draw.circle(screen, YELLOW,(posx, SQUARESIZE//2), RADIUS)
+                
 
             if event.type == pygame.MOUSEBUTTONDOWN and turn == 0:  # Player's turn
                 posx = event.pos[0]
@@ -276,10 +373,10 @@ def start_player_vs_bot(bot_agent):
 
                 if board.board[0][col] == 0:  # Check if column is not full
                     row = board.get_next_open_row(col)  # Get next available row
-                    board.drop_piece(row, col, 1)  # Drop the piece for Player 1
+                    board.drop_piece(row, col, human_piece)  # Drop the piece for Player 1
                     print(board.board)
 
-                    if board.check_win(1):  # Check for a win for Player 1
+                    if board.check_win(human_piece):  # Check for a win for Player 1
                         board.draw_board(screen)
                         draw_text("Player 1 wins!", WHITE, width // 4, height // 3, screen)
                         pygame.display.update()
@@ -292,11 +389,11 @@ def start_player_vs_bot(bot_agent):
             col = bot_agent.best_move(board)  # Get best move from bot
 
             row = board.get_next_open_row(col)  # Get the next available row
-            board.drop_piece(row, col, 2)  # Drop the piece for Bot
+            board.drop_piece(row, col, bot_piece)  # Drop the piece for Bot
 
             print(board.board)
 
-            if board.check_win(2):  # Check for a win for the Bot
+            if board.check_win(bot_piece):  # Check for a win for the Bot
                 board.draw_board(screen)
                 draw_text(" You Lose!", WHITE, width // 4, height // 3, screen)
                 pygame.display.update()
@@ -313,6 +410,44 @@ def start_player_vs_bot(bot_agent):
             break
 
     wait_for_exit(screen)
+
+
+def choose_player_order(bot_agent):
+    screen = pygame.display.set_mode((width, height))
+    pygame.display.set_caption("Choose Turn Order")
+
+    while True:
+        screen.fill(RED)
+        draw_text("Who moves first?", BLACK, width//3, height//4, screen)
+        draw_button(width//4, height//2 - 80, "You go first", screen)
+        draw_button(width//4, height//2 + 20, "Bot goes first", screen)
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x,y = event.pos
+                # bounds of “You go first” button
+                if width//4 <= x <= width//4 + 400 and height//2 - 80 <= y <= height//2 - 80 + 70:
+                    human_piece = 1
+                    bot_piece = 2
+                    turn = 0
+                # bounds of “Bot goes first” button
+                elif width//4 <= x <= width//4 + 400 and height//2 + 20 <= y <= height//2 + 20 + 70:
+                    human_piece =2
+                    bot_piece =1
+                    turn = 1
+                else:
+                    continue
+
+                bot_agent.turn = turn
+                start_player_vs_bot(bot_agent, human_piece, bot_piece,turn)
+                return
+
+
 
 
 def wait_for_exit(screen):

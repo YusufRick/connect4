@@ -5,8 +5,10 @@ from classes.board import Board
 
     
 class Random_Agent:
-        def __init__(self):
-            pass
+        def __init__(self,agent,opponent,turn):
+            self.agent = agent
+            self.opponent = opponent
+            self.turn = turn
 
         def best_move(self, board):
         # Get the list of available columns
@@ -19,17 +21,19 @@ class Random_Agent:
     
     #Plays using a basic set of rules: win > block > random.
 class Smart_Agent:
-        def __init__(self):
-            pass
+        def __init__(self,agent,opponent,turn):
+            self.agent = agent
+            self.opponent = opponent
+            self.turn = turn
         
         
         def best_move(self, board):
             # check for a winning move
             for col in board.get_available_moves():
                 row = board.get_next_open_row(col)
-                board.make_move(col,2)
+                board.make_move(col,self.agent)
 
-                if board.check_win(2):
+                if board.check_win(self.agent):
                     board.board[row][col]=0  # Check if Player 2 can win
                     return col  # 
                 board.board[row][col]=0
@@ -37,8 +41,8 @@ class Smart_Agent:
             # block opponent winning move
             for col in board.get_available_moves():
                 row = board.get_next_open_row(col)
-                board.make_move(col,1)
-                if board.check_win(1):
+                board.make_move(col,self.opponent)
+                if board.check_win(self.opponent):
                     board.board[row][col]=0
                     return col  # Block the winning move
                 

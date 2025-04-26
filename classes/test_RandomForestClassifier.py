@@ -1,19 +1,24 @@
 from sklearn.ensemble import RandomForestClassifier
+from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import copy
+from sklearn.svm import SVC
 import pandas as pd
 
 class MLAgent:
-    def __init__(self):
-        self.ai_piece    = 2
+    def __init__(self,agent,opponent,turn):
+        self.ai_piece    = agent
+        self.opponent = opponent
+        self.turn = turn
         self.model = RandomForestClassifier(n_estimators=100)
         self.trained = False
+        # replace the alphabet with vectors
         self.board_map       = {'x': 1, 'o': 2, 'b': 0}
-        self.result_map      = {'win':  0,
-                                'draw': 1,
-                                'loss': 2}
+        self.result_map      = {'win':  0,'draw': 1,'loss': 2}
 
+
+    # load data from ucimlrepo dataset
     def load_data(self, X, y):
 
         X = X.replace(self.board_map)
@@ -22,6 +27,7 @@ class MLAgent:
         self.X = X
         self.y = y
 
+    #train the model
     def train(self):
 
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=0.2, random_state=42)
@@ -32,6 +38,7 @@ class MLAgent:
 
         accuracy = self.model.score(X_test, y_test)
         print(f"Model Accuracy: {accuracy * 100:.2f}%")
+
 
     def evaluate(self):
 
@@ -47,16 +54,13 @@ class MLAgent:
     # the bot check if its the first or second player.
     # if it's the first player (1), it will get the model to favor "win"
     #if it's the 2nd player, the model will favor "loss" to make sure first player lose.
+    # x is the first player while o is the second player based on the dataset
 
     def best_move(self, board):
         if not self.trained:
             raise Exception("Model is not trained.")
 
-        if self.ai_piece ==1:
-            opponent_piece =2
-        else:
-            opponent_piece = 1
-            
+
         best_col, best_score = -1, -1.0
 
         # Try each possible move
@@ -68,18 +72,19 @@ class MLAgent:
 
             # 2) Opponent’s best reply—to minimize our win-prob
             worst = 1.0
-            for c2 in b1.get_available_moves():
+            for col2 in b1.get_available_moves():
                 b2 = copy.deepcopy(b1)
-                r2 = b2.get_next_open_row(c2)
-                b2.drop_piece(r2, c2, opponent_piece)
+                r2 = b2.get_next_open_row(col2)
+                b2.drop_piece(r2, col2, self.opponent)
 
                 # Encode and get probs
                 flat = [cell for row in b2.board for cell in row]
                 df   = pd.DataFrame([flat], columns=self.X.columns).astype(int)
                 probs = self.model.predict_proba(df)[0]
 
-                # **YOUR LOGIC**: pick class 0 if you're P1, class 2 if you're P2
-                if self.ai_piece == 1:
+                # if turn is 0 (opponent move first), find the outcome of loss
+                # if turn is 1 (bot move first), find the outcome of win
+                if self.turn == 1:
                     score = probs[0]   # P(first-player win)
                 else:
                     score = probs[2]   # P(first-player loss) == P(second-player win)
