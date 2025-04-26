@@ -3,7 +3,6 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import copy
-from sklearn.svm import SVC
 import pandas as pd
 
 class MLAgent:
@@ -60,39 +59,47 @@ class MLAgent:
         if not self.trained:
             raise Exception("Model is not trained.")
 
-
         best_col, best_score = -1, -1.0
 
-        # Try each possible move
+        # Try each available move
         for col in board.get_available_moves():
             # 1) Simulate our move
             b1 = copy.deepcopy(board)
             r1 = b1.get_next_open_row(col)
             b1.drop_piece(r1, col, self.ai_piece)
 
-            # 2) Opponent’s best reply—to minimize our win-prob
-            worst = 1.0
+            # Check if ai win
+            if b1.check_win(self.ai_piece):  
+                return col
+            elif b1.check_win(self.opponent):
+                return col
+
+            # 2) Simulate opponent’s best reply (to minimize our winning probability)
+            worst = 1.0  # Start with the worst value/ worst case
             for col2 in b1.get_available_moves():
                 b2 = copy.deepcopy(b1)
                 r2 = b2.get_next_open_row(col2)
                 b2.drop_piece(r2, col2, self.opponent)
 
-                # Encode and get probs
+                # Encode the board state for prediction
                 flat = [cell for row in b2.board for cell in row]
-                df   = pd.DataFrame([flat], columns=self.X.columns).astype(int)
+                df = pd.DataFrame([flat], columns=self.X.columns).astype(int)
+                
+                # Get predicted probabilities for this board state
                 probs = self.model.predict_proba(df)[0]
 
-                # if turn is 0 (opponent move first), find the outcome of loss
-                # if turn is 1 (bot move first), find the outcome of win
-                if self.turn == 1:
-                    score = probs[0]   # P(first-player win)
-                else:
-                    score = probs[2]   # P(first-player loss) == P(second-player win)
-
+                # Interpret probabilities based on the current turn
+                # if ai piece is 1(first player) get the probability of "win"
+                # else, get the probability of loss(first player losing)
+                if self.ai_piece == 1:  
+                    score = probs[0]  # Probability of first-player win
+                else:  
+                    score = probs[2]  
+                # Update the worst case if the current score is worse
                 worst = min(worst, score)
 
-            # 3) Maximize worst-case
-            if worst > best_score:
+            # 3) Maximize worst-case scenario (minimax)
+            if worst > best_score:  # get highest worst score
                 best_score, best_col = worst, col
 
         return best_col

@@ -1,5 +1,4 @@
 import random
-from classes.board import Board
 
 
 
