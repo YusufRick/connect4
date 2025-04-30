@@ -7,7 +7,7 @@ import math
 from classes.random_agent import Random_Agent
 from classes.random_agent import Smart_Agent
 from classes.minimax_agent import Minimax_Agent
-from classes.hybrid_agent import MLAgent2
+from classes.minimax_agent2 import MLAgent2
 from classes.ml_agent import MLAgent
 from classes.board import Board
 
