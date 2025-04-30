@@ -1,8 +1,7 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
-from sklearn.ensemble import GradientBoostingClassifier
+
 import pandas as pd
 import math
 import random
@@ -16,14 +15,15 @@ class MLAgent2:
         self.depth = 5
         self.model = RandomForestClassifier(n_estimators=100)
         self.trained = False
-        # replace the alphabet with vectors
+        # replace x,o,b into integer for board state
         self.board_map       = {'x': 1, 'o': 2, 'b': 0}
+        #replace win,loss and draw into integer
         self.result_map      = {'win':  0,'draw': 1,'loss': 2}
 
 
     # load data from imported dataset
     def load_data(self, X, y):
-
+         # Preprocess the features dataset (board state)
         X = X.replace(self.board_map)
         X = X.infer_objects(copy=False).astype(int)
         y = y.replace(self.result_map).astype(int).values.ravel()
@@ -32,7 +32,7 @@ class MLAgent2:
 
     #train the model
     def train(self):
-
+        # Split data into training and test sets(20%)
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=0.2, random_state=42)
         self.model.fit(X_train, y_train)
         self.X_test = X_test
@@ -41,17 +41,15 @@ class MLAgent2:
 
         accuracy = self.model.score(X_test, y_test)
         print(f"Model Accuracy: {accuracy * 100:.2f}%")
-        gb_model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=5)
-        gb_model.fit(X_train, y_train)
 
-        gb_accuracy = gb_model.score(X_test, y_test)
-        print(f"Gradient Boosting Accuracy: {gb_accuracy * 100:.2f}%")
-
+    # check the roots of tree (win,lose,draw)
     def is_terminal(self, board):
         return board.check_win( self.ai_piece) or board.check_win(self.opponent) or board.is_full()
 
 
     def minimax(self,board,alpha,beta,depth,maximizingPlayer):
+
+         #if it hits terminal or depth is 0, evaluate the board
         if depth == 0 or self.is_terminal(board):
             return None, self.evaluate_board(board)
 
@@ -68,7 +66,7 @@ class MLAgent2:
                     if eval > max_eval:
                         max_eval= eval
                         best_col = col
-                    
+                    #if alpha(ai) score is > than beta(opponent), stop exploring
                     alpha = max(alpha, eval)
                     if beta <= alpha:  # Beta cut-off
                         break
@@ -88,11 +86,19 @@ class MLAgent2:
                         min_eval = eval
                         best_col = col
                     beta = min(beta, min_eval)
+
+                    #if alpha(ai) score is > than beta(opponent), stop exploring
                     if beta <= alpha:
                         break  # Alpha cut-off
                 return best_col, min_eval
 
     def evaluate_board(self, board):
+
+        # How it works:
+        # the bot check if its the first or second player.
+        # if it's the first player (1), it will get the model to favor "win"
+        #if it's the 2nd player, the model will favor "loss" to make sure first player lose.
+        # x is the first player while o is the second player based on the dataset
         if board.check_win(self.ai_piece):
             return 10000000  # AI wins
         
@@ -112,11 +118,6 @@ class MLAgent2:
         else:  
             return prediction[2]  
 
-    # How it works:
-    # the bot check if its the first or second player.
-    # if it's the first player (1), it will get the model to favor "win"
-    #if it's the 2nd player, the model will favor "loss" to make sure first player lose.
-    # x is the first player while o is the second player based on the dataset
 
 
 
@@ -146,19 +147,20 @@ class MLAgent2:
 
         best_col  = None
         best_score = -math.inf
-
+        #use minimax to search for the best move
         for col in board.get_available_moves():
             b1 = board.copy()
             r = b.get_next_open_row(col)
             b1.drop_piece(r, col, self.ai_piece)
-            _, _score = self.minimax(b1, alpha=-math.inf, beta=+math.inf,depth =self.depth-1, maximizingPlayer=False)
+            _, _score = self.minimax(b1, alpha=-math.inf, beta=+math.inf,depth =self.depth, maximizingPlayer=False)
             
+            #keep track of the highest minimax score
             if _score > best_score:
                     best_score = _score
                     best_col = col
 
 
-
+        #if column is not valid(in case) pick a random valid column.
         valid = board.get_available_moves()
         return best_col if best_col in valid else random.choice(valid)
 

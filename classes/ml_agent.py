@@ -12,19 +12,21 @@ class MLAgent:
         self.turn = turn
         self.ai_piece = ai_piece
         self.opponent = opponent
+        #use random 100 tress
         self.model = RandomForestClassifier(n_estimators=100, random_state=42)
         self.X = None
         self.y = None
         self.trained = False
-        self.board_map = {'x': 1, 'o': 2, 'b': 0}  # Encoding for board states
-        self.result_map = {'win': 0, 'loss': 1, 'draw': 2}  # Encoding for outcomes
+        # replace x,o,b into integer for board state
+        self.board_map = {'x': 1, 'o': 2, 'b': 0}  
+        #replace win,loss and draw into integer
+        self.result_map = {'win': 0, 'loss': 1, 'draw': 2}  
 
     def load_data(self, X, y):
  
         # Preprocess the features dataset (board state)
         X = X.replace(self.board_map)
         X = X.astype(int)
-        
         # Preprocess the outcome labels
         y = y.replace(self.result_map).astype(int).values.ravel()
 
@@ -36,7 +38,7 @@ class MLAgent:
         if self.X is None or self.y is None:
             raise ValueError("Data not loaded.")
         
-        # Split data into training and test sets
+        # Split data into training and test sets(20%)
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=0.2, random_state=42)
         
         # Train the RandomForest model
@@ -54,12 +56,13 @@ class MLAgent:
         if not self.trained:
             raise Exception("Model not trained yet.")
         
+        #start with worst score (lower is better)
         best_col = -1
         best_score = 3
         center_col=3
         best_distance = float('inf')
 
-        # Check for winning move (maximize AI's win)
+        # Check for winning move (ai)
         for col in range(7):
             row = board.get_next_open_row(col)
             if row == -1:
@@ -89,18 +92,17 @@ class MLAgent:
             b1 = board.copy()
             b1.drop_piece(row, col, self.ai_piece)
 
-            # flatten to a 42‐element list in UCI order (a1,a2…a6,b1,…g6)
+            # flatten to a 42‐element list in UCI order
+            # convert into 1d array to match dataset format 
             
             flat = []
             for c in range(7):
                 for r in range(5, -1, -1):           
                     flat.append(int(b1.board[r][c]))
-
-            # convert into 1d array to match dataset format
             # print(flat)
             
 
-            # build the single-row DataFrame for your model
+            # build DataFrame for model
             input_df = pd.DataFrame([flat], columns=self.model.feature_names_in_)
             pred = self.model.predict(input_df)[0]
 
@@ -123,7 +125,7 @@ class MLAgent:
                 else:
                     score=2
 
-            # closest distance to centre
+            # if its a tie, pick a move that is close to center
             dist = abs(move_col - center_col)
             if (score < best_score) or (score == best_score and dist < best_distance):
                 best_score, best_col, best_distance = score, move_col, dist

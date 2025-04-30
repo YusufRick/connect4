@@ -1,6 +1,7 @@
 import numpy as np
 import pygame
 
+#board constant
 ROW_COUNT = 6
 COLUMN_COUNT = 7
 SQUARESIZE = 100
@@ -8,7 +9,7 @@ RADIUS = int(SQUARESIZE / 2 - 5)
 width = COLUMN_COUNT * SQUARESIZE
 height = (ROW_COUNT + 1) * SQUARESIZE
 
-
+#colours
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -21,13 +22,14 @@ class Board:
     def __init__(self):
         self.board = self.create_board()
 
+    # 6 rows, 7 col
     def create_board(self):
         board = np.zeros((ROW_COUNT, COLUMN_COUNT))  
         return board
-    
+    # drop piece
     def drop_piece(self, row, col, piece):
         self.board[row][col] = piece
-
+    #check if board is full
     def is_full(self):
         return all(self.board[0][col] != 0 for col in range(COLUMN_COUNT))
 
@@ -35,16 +37,9 @@ class Board:
     def get_available_moves(self):
         return [col for col in range(7) if self.board[0][col] == 0]
     
-
-    def make_move(self, col, piece):
-        row = self.get_next_open_row(col)
-        if row != -1:
-            self.board[row][col] = piece
-        
-
-    # Get the lowest row
+    # Get the lowest row on the selected column
     def get_next_open_row(self, col):
-        for r in range(5, -1, -1):  # Start from the bottom row
+        for r in range(5, -1, -1):  
             if self.board[r][col] == 0:
                 return r
         return -1
@@ -81,7 +76,9 @@ class Board:
         new_board.board = np.copy(self.board)
         return new_board
 
-    
+        # Draw the blue grid
+        # Draw empty circles in black
+        # Draw red and yellow pieces on board
     def draw_board(self, screen):
         for c in range(COLUMN_COUNT):
             for r in range(ROW_COUNT):

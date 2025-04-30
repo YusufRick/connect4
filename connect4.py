@@ -1,4 +1,4 @@
-# test_ml_agent.py
+
 from ucimlrepo import fetch_ucirepo
 import pygame
 import sys
@@ -12,14 +12,19 @@ from classes.ml_agent2 import MLAgent2
 from classes.ml_agent import MLAgent
 from classes.board import Board
 
+
+#board constant
 ROW_COUNT = 6
 COLUMN_COUNT = 7
 SQUARESIZE = 100
 RADIUS = int(SQUARESIZE / 2 - 5)
 width = COLUMN_COUNT * SQUARESIZE
 height = (ROW_COUNT + 1) * SQUARESIZE
+
+#load data from dataset library
 connect_4 = fetch_ucirepo(id=26)
 
+#colours
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -27,14 +32,19 @@ YELLOW = (255, 255, 0)
 WHITE = (255, 255, 255)
 
 pygame.init()
+#font style
 
 BUTTON_FONT = pygame.font.SysFont("Arial", 30, bold=True)
+
 # Homepage
+
+# draw text to the screen
 def draw_text(text, color, x, y, screen):
     font = pygame.font.SysFont("Arial", 40)
     text_surface = font.render(text, True, color)
     screen.blit(text_surface, (x, y))
 
+#draw rectangle button and mouse click eventListener
 def draw_button(x, y, w, h, text, screen):
 
     rect = pygame.Rect(x, y, w, h)
@@ -50,12 +60,11 @@ def draw_button(x, y, w, h, text, screen):
 def HomePage():
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("Connect 4")
-    
-    # prepare a bold, centered title once
+    #title
     title_font = pygame.font.SysFont("Arial", 40, bold=True)
     title_surf = title_font.render("Welcome to Connect 4", True, YELLOW)
     title_x = (width - title_surf.get_width()) // 2
-    title_y = height // 4  # you can adjust this vertical position as needed
+    title_y = height // 4  
     
     game_running = True
     while game_running:
@@ -64,7 +73,7 @@ def HomePage():
         # draw the bold, centered title
         screen.blit(title_surf, (title_x, title_y))
         
-        # draw your three buttons (you may already have a draw_button helper)
+        # three buttons for model selection
         btn1 =draw_button((width-300)//2, title_y + 80, 300, 60, "Player vs Player", screen)
         btn2 =draw_button((width-300)//2, title_y + 160, 300, 60, "Player vs Bot",    screen)
         btn3=draw_button((width-300)//2, title_y + 240, 300, 60, "Bot vs Bot",       screen)
@@ -73,7 +82,7 @@ def HomePage():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
+            # On click, go to the appropriate setup function
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if btn1.collidepoint(mx, my):
@@ -95,7 +104,7 @@ def choose_bot_agent():
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("Select Bot Agent")
 
-    
+    #function to train machine learning bot
     def _make_ml(bot):
         
         X = connect_4.data.features.replace({'x':1,'o':2,'b':0}).astype(int)
@@ -103,7 +112,8 @@ def choose_bot_agent():
         bot.load_data(X, y)
         bot.train()
         return bot
-
+    
+    #list of agents
     options = [
         ("Random Agent",  lambda: Random_Agent(2,1,0)),
         ("Smart Agent",   lambda: Smart_Agent(2,1,0)),
@@ -118,7 +128,7 @@ def choose_bot_agent():
     spacing_y  = 40
     btn_h      = 70
     btn_w      = (width - spacing_x * (cols + 1)) // cols
-
+    #title
     title_font = pygame.font.SysFont("Arial", 40, bold=True)
     title_s    = title_font.render("Choose your Bot", True, YELLOW)
     title_x    = (width - title_s.get_width()) // 2
@@ -130,12 +140,12 @@ def choose_bot_agent():
         # draw the title
         screen.blit(title_s, (title_x, title_y))
 
-        # draw buttons and collect their rect+factory pairs
+        # Draw option buttons in a grid
         btn_rects = []
         for idx, (label, factory) in enumerate(options):
             row = idx // cols
 
-            # for the very last button when odd count, center it
+            # if selection is odd, centralised
             if idx == len(options) - 1 and len(options) % cols == 1:
                 bx = (width - btn_w) // 2
             else:
@@ -169,6 +179,8 @@ def choose_bot_agent():
 
 # pvp
 def start_player_vs_player():
+
+    #initialized board
     board = Board()
     game_over = False
     turn = 0  # 0 = Player 1 (Red), 1 = Player 2 (Yellow)
@@ -185,23 +197,25 @@ def start_player_vs_player():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
+            # preview token on top
             if event.type == pygame.MOUSEMOTION:
                 pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE)) 
                 posx = event.pos[0]
-
+                #turn =0, colour red
+                # turn = 1 colour yellow
                 if turn == 0:
                     pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE / 2)), RADIUS)
                 else:
                     pygame.draw.circle(screen, YELLOW, (posx, int(SQUARESIZE / 2)), RADIUS)
 
 
-
+            #on click, drop the piece
             if event.type == pygame.MOUSEBUTTONDOWN:
                 posx = event.pos[0]
-                col = int(posx // SQUARESIZE)  # Get the column based on the mouse position
-
-                if board.board[0][col] == 0:  # Check if the column is not full
+                # Get the column based on the mouse position
+                col = int(posx // SQUARESIZE) 
+                # Check if the column is not full
+                if board.board[0][col] == 0:  
                     row = board.get_next_open_row(col)  
                     if turn ==0:
                         piece = 1
@@ -247,8 +261,8 @@ def start_player_vs_player():
                         pygame.draw.circle(screen, YELLOW, (posx, int(SQUARESIZE / 2)), RADIUS)
 
          
-
-                    board.draw_board(screen)  # Redraw the board after the move
+                    # Redraw the board after the move
+                    board.draw_board(screen) 
                     print(board)
 
     wait_for_exit(screen)
@@ -258,7 +272,7 @@ def choose_bot_v_bot():
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("Select Two Bot Agents")
     
-    # helper to instantiate & train an ML-based bot
+    # function to train machine learning agent with dataset
     def _make_ml(cls, piece, opp, turn):
         bot = cls(piece, opp, turn)
         X = connect_4.data.features.replace({'x':1,'o':2,'b':0}).astype(int)
@@ -285,14 +299,14 @@ def choose_bot_v_bot():
         ("ML Agent 2",    lambda: _make_ml(MLAgent2,2, 1, 1)),
     ]
 
-    # grid layout params
+    # grid layout 
     cols       = 2
     spacing_x  = 40
     spacing_y  = 40
     btn_h      = 70
     btn_w      = (width - spacing_x * (cols + 1)) // cols
 
-    # prepare title font/surface
+    # prepare title font
     title_font = pygame.font.SysFont("Arial", 40, bold=True)
     stage1_s   = title_font.render("Choose the first Bot", True, YELLOW)
     stage2_s   = title_font.render("Choose the second Bot", True, YELLOW)
@@ -301,7 +315,7 @@ def choose_bot_v_bot():
 
     bot1 = None
 
-    # Stage 1: pick Bot 1
+    # picking bot1
     while bot1 is None:
         screen.fill(BLACK)
         screen.blit(stage1_s, (title_x, title_y))
@@ -367,32 +381,33 @@ def choose_bot_v_bot():
                         bot2 = factory()
                         break
 
-    # Now start the game with the two bots
+    # start bot v bot
     start_bot_vs_bot(bot1, bot2)
 
 
 
 
-# Bot v Bot Game Loop
+# Bot v Bot 
 def start_bot_vs_bot(bot1, bot2):
-    board = Board()  # Use Board class
+    #initialise board
+    board = Board()  
     game_over = False
-    turn = 0  # initialise turn
+    turn = 0
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("Connect 4 - Bot vs Bot")
 
     while not game_over:
         board.draw_board(screen) # draw board
         pygame.display.update()
-
-        if turn == 0:  # Bot 1's turn
+         # Bot 1's turn
+        if turn == 0:  
             print("Bot 1 is thinking...")
-            col = bot1.best_move(board)  # get bot1 move
+            col = bot1.best_move(board)  
             row = board.get_next_open_row(col)
-            board.drop_piece(row, col, 1)  # Make move for Bot 1
+            board.drop_piece(row, col, 1)  
             print(board.board)
-
-            if board.check_win(1):  # check if bot 1 wins
+            # check if bot 1 wins
+            if board.check_win(1):  
                 board.draw_board(screen)
                 pygame.display.update()
                 draw_text("Bot 1 wins!", YELLOW, width // 4, height//13, screen)
@@ -405,12 +420,14 @@ def start_bot_vs_bot(bot1, bot2):
 
         if turn == 1:  # Bot 2's turn
             print("Bot 2 is thinking...")
-            col = bot2.best_move(board)  # get bot 2 best move
+            # get bot 2 best move
+            col = bot2.best_move(board)  
             row = board.get_next_open_row(col)
-            board.drop_piece(row, col, 2)  # Make move for Bot 2
+            board.drop_piece(row, col, 2)  
             print(board.board)
 
-            if board.check_win(2):  # Bot 2 wins
+            # Bot 2 wins
+            if board.check_win(2):  
                 board.draw_board(screen)
                 pygame.display.update()
                 print("Bot 2 wins!")
@@ -421,7 +438,7 @@ def start_bot_vs_bot(bot1, bot2):
 
             turn = 0  # Switch to Bot 1
         # draw will end at bot's 2 turn since it has 42 blank space
-        if board.is_full() and not game_over:  # Check for a draw
+        if board.is_full() and not game_over:  
             board.draw_board(screen)
             pygame.display.update()
             print("It's a draw!")
@@ -457,6 +474,7 @@ def start_player_vs_bot(bot_agent, human_piece, bot_piece,turn):
                 pygame.quit()
                 sys.exit()
 
+            # Show preview of human piece 
             if event.type == pygame.MOUSEMOTION:
                 pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
                 posx = event.pos[0]
@@ -467,34 +485,34 @@ def start_player_vs_bot(bot_agent, human_piece, bot_piece,turn):
                     
                     pygame.draw.circle(screen, YELLOW,(posx, SQUARESIZE//2), RADIUS)
                 
-
-            if event.type == pygame.MOUSEBUTTONDOWN and turn == 0:  # Player's turn
+            # Player's turn
+            if event.type == pygame.MOUSEBUTTONDOWN and turn == 0:  
                 posx = event.pos[0]
                 col = int(posx // SQUARESIZE)
-
-                if board.board[0][col] == 0:  # Check if column is not full
+                # Check if column is not full
+                if board.board[0][col] == 0:  
                     row = board.get_next_open_row(col) 
-                    board.drop_piece(row, col, human_piece) # drop piece for player 1
+                    board.drop_piece(row, col, human_piece) 
                     print(board.board)
-
-                    if board.check_win(human_piece):  # Check for a win for Player 1
+                     # Check for a win for Player 1
+                    if board.check_win(human_piece):  
                         board.draw_board(screen)
                         draw_text("Player 1 wins!", YELLOW, width // 4, height//13, screen)
                         pygame.display.update()
                         print("Player 1 wins!")
                         game_over = True
                     turn = 1  # Switch turn
-
-        if turn == 1 and not game_over:  # Bot's turn
+        # Bot's turn
+        if turn == 1 and not game_over:  
             print(f"Bot is thinking...")
-            col = bot_agent.best_move(board)  # Get best move from bot
+            col = bot_agent.best_move(board)  
 
             row = board.get_next_open_row(col)  
-            board.drop_piece(row, col, bot_piece)  # Drop the piece for Bot
+            board.drop_piece(row, col, bot_piece) 
 
             print(board.board)
-
-            if board.check_win(bot_piece):  # Check for a win for the Bot
+             # Check for a win for the Bot
+            if board.check_win(bot_piece):  
                 board.draw_board(screen)
                 draw_text(" You Lose!", YELLOW, width // 4, height//13, screen)
                 pygame.display.update()
@@ -502,7 +520,7 @@ def start_player_vs_bot(bot_agent, human_piece, bot_piece,turn):
                 game_over = True
             turn = 0  # Switch turn to player
 
-        if board.is_full() and not game_over:  # Check for a draw
+        if board.is_full() and not game_over: 
             board.draw_board(screen)
             draw_text("Its a Draw!", YELLOW, width // 4, height//13, screen)
             pygame.display.update()
@@ -565,6 +583,7 @@ def choose_player_order(bot_agent):
                             human_piece =2
                             bot_piece = 1
 
+                        #Assign piece numbers and turns
                         bot_agent.ai_piece = bot_piece
                         bot_agent.opponent = human_piece
                         bot_agent.turn = turn_val
@@ -575,6 +594,7 @@ def choose_player_order(bot_agent):
 
 
 def wait_for_exit(screen):
+    #wait until player click and go to homepage
     pygame.display.update()
     waiting = True
     while waiting:
@@ -588,7 +608,14 @@ def wait_for_exit(screen):
 
 
 if __name__ == "__main__":
-    HomePage()
+    # 1) Initialize the mixer and start the music up front
     pygame.mixer.init()
-    pygame.mixer.music.load("music.mp3")
-    pygame.mixer.music.play(-1, 0.0)
+    try:
+        pygame.mixer.music.load("assets/Subway-Surfers-Theme-Sound-Effect.mp3")
+        pygame.mixer.music.set_volume(0.5)        
+        pygame.mixer.music.play(-1)               
+    except pygame.error as e:
+        print("Could not load music:", e)
+
+ 
+    HomePage()
