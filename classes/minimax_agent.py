@@ -99,7 +99,8 @@ class Minimax_Agent:
         col, _score = self.minimax(board,alpha = float('-inf'),beta  = float('inf'),depth = self.depth, maximizingPlayer = True)
         # fallback if no moves
         valid = board.get_available_moves()
-        col = random.choice(valid)
+        if  not valid.contains(col):
+            col = random.choice(valid)
         return col
         
         

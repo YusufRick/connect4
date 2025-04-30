@@ -96,37 +96,21 @@ class MLAgent2:
         if board.check_win(self.ai_piece):
             return 10000000  # AI wins
         
-        elif board.check_win(self.opponent):
+        if board.check_win(self.opponent):
             return -10000000  # Opponent wins
 
         # Evaluate using the ML model at the terminal state (win, loss, or draw)
         flat = [cell for row in board.board for cell in row]
         df = pd.DataFrame([flat], columns=self.X.columns).astype(int)
 
-        if df.isnull().values.any():
-            print("Warning: Board state has invalid values.")
-            return 0  
-
-        probs = self.model.predict_proba(df)[0]
+        prediction = self.model.predict_proba(df)[0]
 
         # If ai is the first player, seearch for win
         #If ai is the second player, search for loss( first player lose)
         if self.ai_piece == 1:  
-            return probs[0]  
+            return prediction[0]  
         else:  
-            return probs[2]  
-
-
-
-    def evaluate(self):
-
-        if not self.trained:
-            print("Model not trained yet.")
-            return
-        predictions = self.model.predict(self.X_test)
-        print("Classification Report:")
-        print(classification_report(self.y_test, predictions))
-
+            return prediction[2]  
 
     # How it works:
     # the bot check if its the first or second player.
@@ -134,59 +118,6 @@ class MLAgent2:
     #if it's the 2nd player, the model will favor "loss" to make sure first player lose.
     # x is the first player while o is the second player based on the dataset
 
-    # def best_move(self, board):
-    #     if not self.trained:
-    #         raise Exception("Model is not trained.")
-
-    #     best_col, best_score = -1, -1.0
-
-    #     # Try each available move
-    #     for col in board.get_available_moves():
-    #         b1 = copy.deepcopy(board)
-    #         r1 = b1.get_next_open_row(col)
-    #         b1.drop_piece(r1, col, self.ai_piece)
-
-    #         if b1.check_win(self.ai_piece):  
-    #             return col  
-
-    #     # Step 2: If no blocking move is found, look for the AI's winning move.
-    #     for col in board.get_available_moves():
-    #         b1 = copy.deepcopy(board)
-    #         r1 = b1.get_next_open_row(col)
-    #         b1.drop_piece(r1, col, self.opponent)
-
-    #         if b1.check_win(self.opponent):  
-    #             return col
-
-    #         # 2) Simulate opponent’s best reply (to minimize our winning probability)
-    #         worst = 1.0  # Start with the worst value/ worst case
-    #         for col2 in b1.get_available_moves():
-    #             b2 = copy.deepcopy(b1)
-    #             r2 = b2.get_next_open_row(col2)
-    #             b2.drop_piece(r2, col2, self.opponent)
-
-    #             # Encode the board state for prediction
-    #             flat = [cell for row in b2.board for cell in row]
-    #             df = pd.DataFrame([flat], columns=self.X.columns).astype(int)
-                
-    #             # Get predicted probabilities for this board state
-    #             probs = self.model.predict_proba(df)[0]
-
-    #             # Interpret probabilities based on the current turn
-    #             # if ai piece is 1(first player) get the probability of "win"
-    #             # else, get the probability of loss(first player losing)
-    #             if self.ai_piece == 1:  
-    #                 score = probs[0]  # Probability of first-player win
-    #             else:  
-    #                 score = probs[2]  
-    #             # Update the worst case if the current score is worse
-    #             worst = min(worst, score)
-
-    #         # 3) Maximize worst-case scenario (minimax)
-    #         if worst > best_score:  # get highest worst score
-    #             best_score, best_col = worst, col
-
-    #     return best_col
 
 
     def best_move(self, board):
@@ -220,12 +151,11 @@ class MLAgent2:
             b1 = board.copy()
             r = b.get_next_open_row(col)
             b1.drop_piece(r, col, self.ai_piece)
-            _, _score = self.minimax(b1, alpha=-math.inf, beta=+math.inf,
-                                    depth=self.depth-1, maximizingPlayer=False)
+            _, _score = self.minimax(b1, alpha=-math.inf, beta=+math.inf,depth =self.depth-1, maximizingPlayer=False)
             
-        if _score > best_score:
-                best_score = _score
-                best_col = col
+            if _score > best_score:
+                    best_score = _score
+                    best_col = col
 
 
 
