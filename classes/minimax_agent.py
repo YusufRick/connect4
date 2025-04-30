@@ -1,48 +1,60 @@
+import random
 class Minimax_Agent:
 
     def __init__(self,ai_player ,opponents,turn):
         
         self.ai_player = ai_player
-        self.opponents = opponents
+        self.opponent = opponents
         self.turn = turn
         self.depth = 5
     
     # check win/lose or draw
     def is_terminal(self, board):
-        return board.check_win( self.ai_player) or board.check_win(self.opponents) or board.is_full()
+        return board.check_win(self.ai_player) or board.check_win(self.opponent) or board.is_full()
 
     #How it works:
     # maximizing agents move and minimizing opponents move
 
     def minimax(self,board,alpha,beta,depth,maximizingPlayer):
         if depth == 0 or self.is_terminal(board):
-            return self.evaluate_board(board)
+            return None, self.evaluate_board(board)
 
         if maximizingPlayer:
                 max_eval = float('-inf')
+                best_col = None
                 for col in board.get_available_moves():  # Get columns
                     row = board.get_next_open_row(col)  
-                    board.make_move(col, self.ai_player)  
-                    eval = self.minimax(board, alpha, beta, depth - 1, False)  # Minimize opponent's move
-                    board.board[row][col] = 0  
+                    b_copy = board.copy()
+                    b_copy.drop_piece(row, col, self.ai_piece)
+                    _,eval = self.minimax(board, alpha, beta, depth - 1, False)  # Minimize opponent's move
+                    
 
-                    max_eval = max(max_eval, eval)
+                    if eval > max_eval:
+                        max_eval= eval
+                        best_col = col
+                    
                     alpha = max(alpha, eval)
                     if beta <= alpha:  # Beta cut-off
                         break
-                return max_eval
+                return best_col, max_eval
         else:
                 min_eval = float('inf')
+                best_col = None
                 for col in board.get_available_moves():
                     row = board.get_next_open_row( col) 
-                    board.make_move(col,self.opponents)
-                    eval = self.minimax(board,alpha,beta,depth - 1, True) # Maximizing bot moves
-                    board.board[row][col] = 0
-                    min_eval = min(min_eval, eval)
-                    beta = min(beta, eval)
+                    b_copy = board.copy()
+                    b_copy.drop_piece(row, col, self.ai_piece)
+                    _,eval = self.minimax(board,alpha,beta,depth - 1, True) # Maximizing bot moves
+                    
+
+
+                    if eval < min_eval:
+                        min_eval = eval
+                        best_col = col
+                        beta = min(beta, min_eval)
                     if beta <= alpha:
                         break  # Alpha cut-off
-                return min_eval
+                return best_col, min_eval
 
         
     # if a move results in agent winning, reward with infinite points
@@ -54,96 +66,43 @@ class Minimax_Agent:
         if board.check_win(self.ai_player):
             return 1000000  # AI wins
         
-        elif board.check_win(self.opponents):
+        elif board.check_win(self.opponent):
             return -10000000  # Opponent wins
 
-        score = 0
-        available_moves = board.get_available_moves()
 
+        return 0
+
+    
         
-        for col in available_moves:
+    def best_move(self, board):
+
+        for col in range(7):
             row = board.get_next_open_row(col)
-        
-            board.board[row][col] = self.ai_player
-            if board.check_win(self.ai_player):
-                score += 100  # Reward AI for winning
+            if row == -1:
+                continue
 
-        # Simulate the opponent's move
-            board.board[row][col] = self.opponents
-            if board.check_win(self.opponents):
-                score -= 10000  # Penalize if it allows the opponent to win
+            b_copy = board.copy()
+            b_copy.drop_piece(row, col, self.ai_piece)
 
-        # Undo the move
-            board.board[row][col] = 0
+            if b_copy.check_win(self.ai_piece):
+                return col
 
-        return score
-
-    
-        
-    def best_move(self,board):
-        #fetching the best move for minimax agent
-        # simulate to see 5 moves ahead.
-        best_val = float('-inf')
-        move = None
-        for col in board.get_available_moves():
+        # Block opponent's winning move
+        for col in range(7):
             row = board.get_next_open_row(col)
-            board.make_move(col, self.ai_player)
-            move_val = self.minimax(board, float('-inf'), float('inf'),self.depth,False) 
-            board.board[row][col] = 0
-            if move_val > best_val:
-                best_val = move_val
-                move = col
-        return move
+            b_copy = board.copy()
+            b_copy.drop_piece(row, col, self.opponent)
+
+            if b_copy.check_win(self.opponent):
+                return col
+            
+        col, _score = self.minimax(board,alpha = float('-inf'),beta  = float('inf'),depth = self.depth, maximizingPlayer = True)
+        # fallback if no moves
+        valid = board.get_available_moves()
+        col = random.choice(valid)
+        return col
         
-    # Check if the board is full / draw
-    # def is_full(self,board):
-    #     return all(board[row][col] != 0 for row in range(6) for col in range(7))
-
-    # # get available moves
-    # def get_available_moves(self, board):
-    #         return [col for col in range(7) if board[0][col] == 0]
-    
-
-    # def make_move(self,board,col,piece):
-    #     row = self.get_next_open_row(board,col)
-    #     if row != -1:
-    #         board[row][col] = piece
         
-
-    # # get the lowest row
-    # def get_next_open_row(self, board, col):
-    #     for r in range(5, -1, -1):  # Start from the bottom row
-    #         if board[r][col] == 0:
-    #             return r
-    #     return -1
-
-    # def check_win(self, board, piece):
-    #     # Horizontal Check
-    #     for r in range(6):
-    #         for c in range(4):
-    #             if all(board[r][c+i] == piece for i in range(4)):
-    #                 return True
-
-    #     # Vertical Check
-    #     for r in range(3):
-    #         for c in range(7):
-    #             if all(board[r+i][c] == piece for i in range(4)):
-    #                 return True
-
-    #     # Diagonal Down-Right Check
-    #     for r in range(3):
-    #         for c in range(4):
-    #             if all(board[r+i][c+i] == piece for i in range(4)):
-    #                 return True
-
-    #     # Diagonal Down-Left Check
-    #     for r in range(3):
-    #         for c in range(3, 7):
-    #             if all(board[r+i][c-i] == piece for i in range(4)):
-    #                 return True
-
-    #     return False
-    
 
 # function minimax(node, depth, maximizingPlayer) is
 #     if depth = 0 or node is a terminal node then

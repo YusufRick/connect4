@@ -29,7 +29,7 @@ class Board:
         self.board[row][col] = piece
 
     def is_full(self):
-        return all(self.board[row][col] != 0 for row in range(6) for col in range(7))
+        return all(self.board[0][col] != 0 for col in range(COLUMN_COUNT))
 
     # Get available moves
     def get_available_moves(self):
@@ -76,8 +76,13 @@ class Board:
 
         return False
     
+    def copy(self):
+        new_board = Board()
+        new_board.board = np.copy(self.board)
+        return new_board
+
+    
     def draw_board(self, screen):
-        """Draws the board on the screen."""
         for c in range(COLUMN_COUNT):
             for r in range(ROW_COUNT):
                 pygame.draw.rect(screen, BLUE, (c * SQUARESIZE, r * SQUARESIZE + SQUARESIZE, SQUARESIZE, SQUARESIZE))

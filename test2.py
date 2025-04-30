@@ -6,10 +6,8 @@ import numpy as np
 import math
 from classes.random_agent import Random_Agent
 from classes.random_agent import Smart_Agent
+from classes.hybrid_agent import MLAgent2
 from classes.minimax_agent import Minimax_Agent
-from classes.test_RandomForestClassifier import MLAgent
-from classes.hybrid_agent import HybridAgent
-
 from classes.board import Board
 
 ROW_COUNT = 6
@@ -70,7 +68,7 @@ def HomePage():
                     print("Player vs Bot selected")
                     choose_bot_agent()
 
-                # Player vs MiniMax Agent selected
+                # bot v bot
                 elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 120 <= posy <= height // 2 + 120 + 60:
                     print("Bot v Bot")
                     choose_bot_v_bot()
@@ -78,7 +76,6 @@ def HomePage():
         pygame.display.update()
 
 
-# Choose Bot
 # Choose Bot
 def choose_bot_agent():
     screen = pygame.display.set_mode((width, height))
@@ -91,9 +88,8 @@ def choose_bot_agent():
         draw_text("Choose your Bot", BLACK, width // 4, height // 4, screen)
         draw_button(width // 4, height // 2 - 80, "Random Agent", screen)
         draw_button(width // 4, height // 2 + 20, "Smart Agent", screen)
-        draw_button(width // 4, height // 2 + 120, "MiniMax Agent", screen)
-        draw_button(width // 4, height // 2 + 220, "ML Agent", screen)
-        draw_button(width // 4, height // 2 + 320, "Hybrid Agent", screen)  # Add Hybrid Agent option
+        draw_button(width // 4, height // 2 + 120, "ML Agent 2.0", screen)
+        draw_button(width // 4, height // 2 + 220, "Minimax", screen)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -113,28 +109,15 @@ def choose_bot_agent():
                     choose_player_order(Smart_Agent(2,1,0))
 
                 elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 120 <= posy <= height // 2 + 120 + 60:
-                    print("MiniMax Agent selected")
-                    choose_player_order(Minimax_Agent(2,1,0))
+                    print("ML Agent 2 Agent selected")
+                    choose_player_order(MLAgent2(2,1,0))
 
                 elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 220 <= posy <= height // 2 + 220 + 60:
-                    print("ML Agent selected")
-                    ml_agent = MLAgent(2,1,0)
-                    X = connect_4.data.features
-                    X = X.replace({'x': 1, 'o': 2, 'b': 0}).astype(int)
-
-                    y = connect_4.data.targets
-                    y = y.replace({'win': 0, 'draw': 1, 'loss': 2})
-                    ml_agent.load_data(X, y) 
-                    ml_agent.train()
+                    print("Minimax selected")
+                    ml_agent = Minimax_Agent(2,1,0)
                     choose_player_order(ml_agent)  # Use ML Agent here
 
-                elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 320 <= posy <= height // 2 + 320 + 60:
-                    print("Hybrid Agent selected")
-                    hybrid_agent = HybridAgent(2, 1, 0)
-                    choose_player_order(hybrid_agent)  # Use Hybrid Agent here
-
         pygame.display.update()
-
 
 # pvp
 def start_player_vs_player():
@@ -223,7 +206,6 @@ def start_player_vs_player():
     wait_for_exit(screen)
 
 # Bot v Bot
-# Bot v Bot
 def choose_bot_v_bot():
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("Select Two Bot Agents")
@@ -234,14 +216,13 @@ def choose_bot_v_bot():
 
     while game_running:
         screen.fill(RED)
-
+        
         if not bot1:  # First bot selection screen
             draw_text("Choose the first Bot", BLACK, width // 4, height // 4, screen)
             draw_button(width // 4, height // 2 - 80, "Random Agent", screen)
             draw_button(width // 4, height // 2 + 20, "Smart Agent", screen)
-            draw_button(width // 4, height // 2 + 120, "MiniMax Agent", screen)
-            draw_button(width // 4, height // 2 + 220, "ML Agent", screen)  # Add ML Agent option
-            draw_button(width // 4, height // 2 + 320, "Hybrid Agent", screen)  # Add Hybrid Agent option
+            draw_button(width // 4, height // 2 + 120, "ML Agent 2.0", screen)
+            draw_button(width // 4, height // 2 + 220, "Minimax Agent", screen)  # Add ML Agent option
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -254,23 +235,20 @@ def choose_bot_v_bot():
 
                     if width // 3 <= posx <= width // 3 + 200 and height // 2 - 80 <= posy <= height // 2 - 80 + 60:
                         print("Random Agent selected as Bot 1")
-                        bot1 = Random_Agent(1, 2, 0)
+                        bot1 = Random_Agent(1,2,0)
 
                     elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 20 <= posy <= height // 2 + 20 + 60:
                         print("Smart Agent selected as Bot 1")
-                        bot1 = Smart_Agent(1, 2, 0)
+                        bot1 = Smart_Agent(1,2,0)
 
                     elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 120 <= posy <= height // 2 + 120 + 60:
-                        print("MiniMax Agent selected as Bot 1")
-                        bot1 = Minimax_Agent(1, 2, 0)
+                        print("ML agent 2 Agent selected as Bot 1")
+                        bot1 = MLAgent2(1,2,0)
 
                     elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 220 <= posy <= height // 2 + 220 + 60:
-                        print("ML Agent selected as Bot 1")
-                        bot1 = MLAgent(1, 2, 0)  # ML Agent, passing player and opponent pieces and turn
+                        print("Minimaxselected as Bot 1")
+                        bot1 - Minimax_Agent(1,2,0)
 
-                    elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 320 <= posy <= height // 2 + 320 + 60:
-                        print("Hybrid Agent selected as Bot 1")
-                        bot1 = HybridAgent(1, 2, 0)  # Initialize Hybrid Agent for Bot 1
 
             pygame.display.update()
 
@@ -280,9 +258,8 @@ def choose_bot_v_bot():
             draw_text("Choose the second Bot", BLACK, width // 4, height // 4, screen)
             draw_button(width // 4, height // 2 - 80, "Random Agent", screen)
             draw_button(width // 4, height // 2 + 20, "Smart Agent", screen)
-            draw_button(width // 4, height // 2 + 120, "MiniMax Agent", screen)
-            draw_button(width // 4, height // 2 + 220, "ML Agent", screen)  # Add ML Agent option
-            draw_button(width // 4, height // 2 + 320, "Hybrid Agent", screen)  # Add Hybrid Agent option
+            draw_button(width // 4, height // 2 + 120, "ML Agent 2", screen)
+            draw_button(width // 4, height // 2 + 220, "Minimax Agent", screen)  # Add ML Agent option
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -295,29 +272,19 @@ def choose_bot_v_bot():
 
                     if width // 3 <= posx2 <= width // 3 + 200 and height // 2 - 80 <= posy2 <= height // 2 - 80 + 60:
                         print("Random Agent selected as Bot 2")
-                        bot2 = Random_Agent(2, 1, 1)
+                        bot2 = Random_Agent(2,1,0)
 
                     elif width // 3 <= posx2 <= width // 3 + 200 and height // 2 + 20 <= posy2 <= height // 2 + 20 + 60:
                         print("Smart Agent selected as Bot 2")
-                        bot2 = Smart_Agent(2, 1, 1)
+                        bot2 = Smart_Agent(2,1,0)
 
                     elif width // 3 <= posx2 <= width // 3 + 200 and height // 2 + 120 <= posy2 <= height // 2 + 120 + 60:
-                        print("MiniMax Agent selected as Bot 2")
-                        bot2 = Minimax_Agent(2, 1, 1)
+                        print("ML Agent 2 selected as Bot 2")
+                        bot2 = MLAgent2(2,1,0)
 
                     elif width // 3 <= posx2 <= width // 3 + 200 and height // 2 + 220 <= posy2 <= height // 2 + 220 + 60:
-                        print("ML Agent selected as Bot 2")
-                        bot2 = MLAgent(2, 1, 1)  # ML Agent, passing player and opponent pieces and turn
-                        X = connect_4.data.features
-                        X = X.replace({'x': 1, 'o': 2, 'b': 0}).astype(int)
-                        y = connect_4.data.targets
-                        y = y.replace({'win': 0, 'draw': 1, 'loss': 2})
-                        bot1.load_data(X, y) 
-                        bot1.train()
-
-                    elif width // 3 <= posx2 <= width // 3 + 200 and height // 2 + 320 <= posy2 <= height // 2 + 320 + 60:
-                        print("Hybrid Agent selected as Bot 2")
-                        bot2 = HybridAgent(2, 1, 1)  # Initialize Hybrid Agent for Bot 2
+                        print("Minimax selected as Bot 2")
+                        bot2 = Minimax_Agent(2, 1, 0)
 
                     start_bot_vs_bot(bot1, bot2)  # Start Bot vs Bot game
                     return  # Exit the function after starting the game
@@ -325,47 +292,8 @@ def choose_bot_v_bot():
             pygame.display.update()
 
 
-        # After bot1 is selected, move to bot2 selection
-        if bot1:
-            screen.fill(RED)
-            draw_text("Choose the second Bot", BLACK, width // 4, height // 4, screen)
-            draw_button(width // 4, height // 2 - 80, "Random Agent", screen)
-            draw_button(width // 4, height // 2 + 20, "Smart Agent", screen)
-            draw_button(width // 4, height // 2 + 120, "MiniMax Agent", screen)
-            draw_button(width // 4, height // 2 + 220, "ML Agent", screen)  # Add ML Agent option
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    posx2 = event.pos[0]
-                    posy2 = event.pos[1]
-
-                    if width // 3 <= posx2 <= width // 3 + 200 and height // 2 - 80 <= posy2 <= height // 2 - 80 + 60:
-                        print("Random Agent selected as Bot 2")
-                        bot2 = Random_Agent(2,1,1)
-
-                    elif width // 3 <= posx2 <= width // 3 + 200 and height // 2 + 20 <= posy2 <= height // 2 + 20 + 60:
-                        print("Smart Agent selected as Bot 2")
-                        bot2 = Smart_Agent(2,1,1)
-
-                    elif width // 3 <= posx2 <= width // 3 + 200 and height // 2 + 120 <= posy2 <= height // 2 + 120 + 60:
-                        print("MiniMax Agent selected as Bot 2")
-                        bot2 = Minimax_Agent(2,1,1)
-
-                    elif width // 3 <= posx2 <= width // 3 + 200 and height // 2 + 220 <= posy2 <= height // 2 + 220 + 60:
-                        print("ML Agent selected as Bot 2")
-                        bot2 = MLAgent(2,1,1)  # ML Agent, passing player and opponent pieces and turn
-
-                    start_bot_vs_bot(bot1, bot2)  # Start Bot vs Bot game
-                    return  # Exit the function after starting the game
-
-            pygame.display.update()
 
 
-# Bot v Bot Game Loop
 # Bot v Bot Game Loop
 def start_bot_vs_bot(bot1, bot2):
     board = Board()  # Use Board class to manage the game state
@@ -412,17 +340,15 @@ def start_bot_vs_bot(bot1, bot2):
                 wait_for_exit(screen)
                 game_over = True
 
-            turn = 0  # Switch turn to Bot 1
+            turn = 0  # Switch to Bot 1
 
         if board.is_full() and not game_over:  # Check for a draw
             board.draw_board(screen)
-            draw_text("Its a Draw!", WHITE, width // 4, height // 3, screen)
             pygame.display.update()
             print("It's a draw!")
             game_over = True
 
     pygame.quit()
-
 
 
 #choose bot v bot
@@ -443,8 +369,8 @@ def choose_bot_v_bot():
             draw_text("Choose the first Bot", BLACK, width // 4, height // 4, screen)
             draw_button(width // 4, height // 2 - 80, "Random Agent", screen)
             draw_button(width // 4, height // 2 + 20, "Smart Agent", screen)
-            draw_button(width // 4, height // 2 + 120, "MiniMax Agent", screen)
-            draw_button(width // 4, height // 2 + 220, "ML Agent", screen)  # Add ML Agent option
+            draw_button(width // 4, height // 2 + 120, "ML Agent", screen)
+            draw_button(width // 4, height // 2 + 220, "Minimax Agent", screen)  # Add ML Agent option
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -464,20 +390,13 @@ def choose_bot_v_bot():
                         bot1 = Smart_Agent(1,2,0)
 
                     elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 120 <= posy <= height // 2 + 120 + 60:
-                        print("MiniMax Agent selected as Bot 1")
-                        bot1 = Minimax_Agent(1,2,0)
+                        print("ML Agent selected as Bot 1")
+                        bot1 = MLAgent2(1,2,0)
 
                     elif width // 3 <= posx <= width // 3 + 200 and height // 2 + 220 <= posy <= height // 2 + 220 + 60:
-                        print("ML Agent selected as Bot 1")
-                        bot1 = MLAgent(1,2,0)
-                        X = connect_4.data.features
-                        X = X.replace({'x': 1, 'o': 2, 'b': 0}).astype(int)
+                        print("Minimax selected as Bot 1")
+                        bot1 = Minimax_Agent(1,2,0)
 
-
-                        y = connect_4.data.targets
-                        y = y.replace({'win': 0, 'draw': 1, 'loss': 2})
-                        bot1.load_data(X, y) 
-                        bot1.train()  
 
             pygame.display.update()
 
@@ -487,8 +406,8 @@ def choose_bot_v_bot():
             draw_text("Choose the second Bot", BLACK, width // 4, height // 4, screen)
             draw_button(width // 4, height // 2 - 80, "Random Agent", screen)
             draw_button(width // 4, height // 2 + 20, "Smart Agent", screen)
-            draw_button(width // 4, height // 2 + 120, "MiniMax Agent", screen)
-            draw_button(width // 4, height // 2 + 220, "ML Agent", screen)  # Add ML Agent option
+            draw_button(width // 4, height // 2 + 120, "ML  Agent", screen)
+            draw_button(width // 4, height // 2 + 220, "Minimax Agent", screen)  # Add ML Agent option
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -509,19 +428,11 @@ def choose_bot_v_bot():
 
                     elif width // 3 <= posx2 <= width // 3 + 200 and height // 2 + 120 <= posy2 <= height // 2 + 120 + 60:
                         print("MiniMax Agent selected as Bot 2")
-                        bot2 = Minimax_Agent(2,1,0)
+                        bot2 = MLAgent2(2,1,0)
 
                     elif width // 3 <= posx2 <= width // 3 + 200 and height // 2 + 220 <= posy2 <= height // 2 + 220 + 60:
                         print("ML Agent selected as Bot 2")
-                        bot2 = MLAgent(2,1,0)
-                        X = connect_4.data.features
-                        X = X.replace({'x': 1, 'o': 2, 'b': 0}).astype(int)
-
-
-                        y = connect_4.data.targets
-                        y = y.replace({'win': 0, 'draw': 1, 'loss': 2})
-                        bot2.load_data(X, y) 
-                        bot2.train()
+                        bot2 = Minimax_Agent(2, 1, 0)  # Initialize bot2 (AI piece 2, opponent 1)
 
                     start_bot_vs_bot(bot1, bot2)
                     return  # Exit the function after starting the game
