@@ -106,7 +106,21 @@ class MLAgent2:
             return -10000000  # Opponent wins
 
         # Evaluate using the ML model at the terminal state (win, loss, or draw)
-        flat = [cell for row in board.board for cell in row]
+        for move_col in range(7):
+        # find where our piece would land
+            move_row = board.get_next_open_row(move_col)
+            if move_row < 0:
+                continue
+            b1 = board.copy()
+            b1.drop_piece(move_row, move_col, self.ai_piece)
+
+            # flatten to a 42‐element list in UCI order
+            # convert into 1d array to match dataset format 
+            
+            flat = []
+            for c in range(7):
+                for r in range(5, -1, -1):           
+                    flat.append(int(b1.board[r][c]))
         df = pd.DataFrame([flat], columns=self.X.columns).astype(int)
 
         prediction = self.model.predict_proba(df)[0]

@@ -608,7 +608,7 @@ def wait_for_exit(screen):
 
 
 if __name__ == "__main__":
-    # 1) Initialize the mixer and start the music up front
+    # Initialize the mixer and start the music up front
     pygame.mixer.init()
     try:
         pygame.mixer.music.load("assets/Subway-Surfers-Theme-Sound-Effect.mp3")

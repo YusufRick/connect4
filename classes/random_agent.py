@@ -8,9 +8,11 @@ class Random_Agent:
             self.agent = agent
             self.opponent = opponent
             self.turn = turn
+            self.total_nodes = 0  
 
         def best_move(self, board):
         # Get the list of available columns
+            self.total_nodes += 1 
             available_moves = board.get_available_moves()
 
         # Choose a random column from the available moves
@@ -24,13 +26,15 @@ class Smart_Agent:
             self.agent = agent
             self.opponent = opponent
             self.turn = turn
+            self.total_nodes =0
         
         
         def best_move(self, board):
             # check for a winning move
+            self.total_nodes += 1 
             for col in board.get_available_moves():
                 row = board.get_next_open_row(col)
-                board.make_move(col,self.agent)
+                board.drop_piece(row,col,self.agent)
 
                 if board.check_win(self.agent):
                     board.board[row][col]=0  # Check if Player 2 can win
@@ -40,7 +44,7 @@ class Smart_Agent:
             # block opponent winning move
             for col in board.get_available_moves():
                 row = board.get_next_open_row(col)
-                board.make_move(col,self.opponent)
+                board.drop_piece(row,col,self.opponent)
                 if board.check_win(self.opponent):
                     board.board[row][col]=0
                     return col  # Block the winning move

@@ -7,6 +7,9 @@ class Minimax_Agent:
         self.opponent  = opponent
         self.turn      = turn
         self.depth     = 5
+        self.total_nodes = 0  # initialize node expansion count
+        self.total_prunes = 0  # initialize prune count
+        self.max_depth_reached = 0 
 
     
     #check the roots for each tree
@@ -30,6 +33,7 @@ class Minimax_Agent:
     #
 
     def minimax(self, board, depth, alpha, beta, maximizing_player):
+        self.total_nodes+= 1  # initialize node expansion count
 
         #if it reach depth 0, evaluate the board
         if depth == 0 or self.is_terminal(board):
@@ -61,6 +65,8 @@ class Minimax_Agent:
 
                 #if alpha (the ai) is better than beta(opponents), stop explore
                 if alpha >= beta:
+                    self.total_prunes +=1  #  prune count + 1
+
                     break
             return best_col, value
 
@@ -84,6 +90,8 @@ class Minimax_Agent:
 
                 #if alpha is > than beta, stop exploring
                 if alpha >= beta:
+                    self.total_prunes +=1  # prune count + 1
+
                     break
             return best_col, value
 

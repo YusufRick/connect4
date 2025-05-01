@@ -20,7 +20,8 @@ class MLAgent:
         # replace x,o,b into integer for board state
         self.board_map = {'x': 1, 'o': 2, 'b': 0}  
         #replace win,loss and draw into integer
-        self.result_map = {'win': 0, 'loss': 1, 'draw': 2}  
+        self.result_map = {'win': 0, 'loss': 1, 'draw': 2} 
+        self.total_nodes = 0  
 
     def load_data(self, X, y):
  
@@ -53,6 +54,7 @@ class MLAgent:
         self.trained = True
 
     def best_move(self, board):
+        self.total_nodes +=1
         if not self.trained:
             raise Exception("Model not trained yet.")
         
@@ -90,7 +92,7 @@ class MLAgent:
             if move_row < 0:
                 continue
             b1 = board.copy()
-            b1.drop_piece(row, col, self.ai_piece)
+            b1.drop_piece(move_row, move_col, self.ai_piece)
 
             # flatten to a 42‐element list in UCI order
             # convert into 1d array to match dataset format 
