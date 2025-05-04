@@ -22,17 +22,15 @@ def play_match(agent1, agent2, first=1):
         "moves": 0,
         "nodes1": 0,
         "prunes1": 0,
-        "depth1": 0.0,   # avg depth per move
+        "depth1": 0,   # total depth over all moves
         "nodes2": 0,
         "prunes2": 0,
-        "depth2": 0.0,   # avg depth per move
+        "depth2": 0,   # total depth over all moves
     }
 
-    # Helpers to accumulate depth
+    # Accumulators for total depth
     depth_sum1 = 0
     depth_sum2 = 0
-    move_count1 = 0
-    move_count2 = 0
 
     start = time.perf_counter()
 
@@ -47,41 +45,39 @@ def play_match(agent1, agent2, first=1):
     # Main game loop
     while True:
         if turn == 0:
-            # reset & play agent1
+            # reset per-move depth, then pick agent1’s move
             agent1.max_depth_reached = 0
             col = agent1.best_move(board)
             depth_sum1 += agent1.max_depth_reached
-            move_count1 += 1
             piece = 1
         else:
-            # reset & play agent2
+            # same for agent2
             agent2.max_depth_reached = 0
             col = agent2.best_move(board)
             depth_sum2 += agent2.max_depth_reached
-            move_count2 += 1
             piece = 2
 
         row = board.get_next_open_row(col)
         board.drop_piece(row, col, piece)
         stats["moves"] += 1
 
-        # check for terminal
+        # terminal?
         if board.check_win(piece) or board.is_full():
             stats["winner"] = piece if board.check_win(piece) else 0
             break
 
         turn ^= 1
 
-    # finalize stats
+    # finalize instrumentation
     stats["time"]    = time.perf_counter() - start
     stats["nodes1"]  = agent1.total_nodes
     stats["prunes1"] = agent1.total_prunes
-    stats["depth1"]  = (depth_sum1 / move_count1) if move_count1 else 0.0
+    stats["depth1"]  = depth_sum1
     stats["nodes2"]  = agent2.total_nodes
     stats["prunes2"] = agent2.total_prunes
-    stats["depth2"]  = (depth_sum2 / move_count2) if move_count2 else 0.0
+    stats["depth2"]  = depth_sum2
 
-    # reset all counters for next match
+    # reset for next match
     for a in (agent1, agent2):
         a.total_nodes = 0
         a.total_prunes = 0
@@ -112,7 +108,7 @@ df_RvS  = tournament(Random_Agent, Smart_Agent,  n=500)
 df_SvM  = tournament(Smart_Agent,  Minimax_Agent, n=500)
 df_MvML = tournament(Minimax_Agent, MLAgent,       n=500)
 
-# Combine + summarize
+# Combine + summarize (now depth1/depth2 are total-depth-per-game)
 df = pd.concat([df_RvS, df_SvM, df_MvML], ignore_index=True)
 summary = df.groupby("matchup").agg(
     WinRate1   = ("winner", lambda x: (x == 1).mean()),
@@ -120,15 +116,18 @@ summary = df.groupby("matchup").agg(
     WinRate2   = ("winner", lambda x: (x == 2).mean()),
     AvgNodes1  = ("nodes1", "mean"),
     AvgPrunes1 = ("prunes1", "mean"),
-    AvgDepth1  = ("depth1", "mean"),
+    TotalDepth1= ("depth1", "mean"),   # mean total depth per game
     AvgNodes2  = ("nodes2", "mean"),
     AvgPrunes2 = ("prunes2", "mean"),
-    AvgDepth2  = ("depth2", "mean"),
+    TotalDepth2= ("depth2", "mean"),   # mean total depth per game
     AvgMoves   = ("moves", "mean"),
     AvgTime    = ("time", "mean"),
 ).reset_index()
 
 print(summary)
+
+# …then your existing plotting code, referencing TotalDepth1/TotalDepth2…
+
 
 # === Plots ===
 sns.set(style="whitegrid")
