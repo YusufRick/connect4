@@ -33,7 +33,10 @@ class Minimax_Agent:
     #
 
     def minimax(self, board, depth, alpha, beta, maximizing_player):
-        self.total_nodes+= 1  # initialize node expansion count
+        self.total_nodes+= 1
+        current_level = self.depth - depth
+        if current_level > self.max_depth_reached:
+            self.max_depth_reached = current_level
 
         #if it reach depth 0, evaluate the board
         if depth == 0 or self.is_terminal(board):
@@ -91,6 +94,7 @@ class Minimax_Agent:
                 #if alpha is > than beta, stop exploring
                 if alpha >= beta:
                     self.total_prunes +=1  # prune count + 1
+                    
 
                     break
             return best_col, value

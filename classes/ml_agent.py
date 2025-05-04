@@ -22,6 +22,7 @@ class MLAgent:
         #replace win,loss and draw into integer
         self.result_map = {'win': 0, 'loss': 1, 'draw': 2} 
         self.total_nodes = 0  
+        self.max_depth_reached =0
 
     def load_data(self, X, y):
  
@@ -55,6 +56,8 @@ class MLAgent:
 
     def best_move(self, board):
         self.total_nodes +=1
+        self.max_depth_reached =1
+        
         if not self.trained:
             raise Exception("Model not trained yet.")
         
